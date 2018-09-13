@@ -53,7 +53,6 @@ class FashionItem(scrapy.Item):
     sale_price = StrippedField()
     base_price = StrippedField()
     sizes = StrippedField()
-    photos = StrippedField()
     colors = StrippedField()
     link = StrippedField()
     details = StrippedField()

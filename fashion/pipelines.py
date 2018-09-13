@@ -4,8 +4,18 @@
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
+from scrapy.exporters import CsvItemExporter
 
 
 class FashionPipeline(object):
+    def open_spider(self, spider):
+        self.file = open('%s.csv' % spider.name, 'w+b')
+        self.exporter = CsvItemExporter(self.file)
+        self.exporter.start_exporting()
+
+    def close_spider(self, spider):
+        self.file.close()
+
     def process_item(self, item, spider):
+        self.exporter.export_item( item )
         return item
