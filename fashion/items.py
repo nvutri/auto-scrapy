@@ -21,6 +21,11 @@ def strip_non_unicode(value):
         return value
 
 
+def clean_price(value):
+    value = value.replace('$', '')
+    return float(value)
+
+
 class JoinStripped(Join):
     """Join a stripped list of strings."""
 
@@ -41,18 +46,35 @@ class StrippedField(scrapy.Field):
         super(StrippedField, self).__init__(*args, **kwargs)
 
 
+class PriceField(scrapy.Field):
+    def __init__(self, *args, **kwargs):
+        kwargs['input_processor'] = MapCompose(remove_tags, clean_price)
+        kwargs['output_processor'] = TakeFirst()
+        super(PriceField, self).__init__(*args, **kwargs)
+
+
+class JoinUnique(Join):
+    """Join a stripped list of strings."""
+
+    def __call__(self, values, separator=', '):
+        stripped_text = [strip_non_unicode(t) for t in values if t.strip()]
+        uniq_list = []
+        for elem in stripped_text:
+            if elem not in uniq_list:
+                uniq_list.append(elem)
+        single_string = separator.join(uniq_list)
+        return single_string.strip()
+
+
 class FashionItem(scrapy.Item):
     """Item for fashion website."""
-    url = scrapy.Field(output_processor=TakeFirst())
-    photo = scrapy.Field(output_processor=TakeFirst())
+    photos = StrippedField(output_processor=JoinUnique())
     record_id = scrapy.Field(output_processor=TakeFirst())
     material = StrippedField()
     fit = StrippedField()
     title = StrippedField()
-    price = StrippedField()
-    sale_price = StrippedField()
-    base_price = StrippedField()
-    sizes = StrippedField()
+    price = PriceField()
+    sizes = StrippedField(output_processor=JoinUnique())
     colors = StrippedField()
     link = StrippedField()
     details = StrippedField()
