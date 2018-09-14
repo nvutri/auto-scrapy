@@ -22,6 +22,9 @@ NEWSPIDER_MODULE = 'fashion.spiders'
 ROBOTSTXT_OBEY = False
 # CLOSESPIDER_ITEMCOUNT = 100
 # CLOSESPIDER_PAGECOUNT = 20
+AWS_SECRET_ACCESS_KEY = ""
+AWS_ACCESS_KEY_ID = ""
+IMAGES_STORE = 's3://vorafashion/%s/' % SPIDER
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
 
@@ -66,9 +69,11 @@ ROBOTSTXT_OBEY = False
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   'fashion.pipelines.FashionPipeline': 300,
+   'fashion.pipelines.FashionImagesPipeline': 10,
+   'fashion.pipelines.FashionPipeline': 12
 }
-
+IMAGES_URLS_FIELD = 'photo_urls'
+IMAGES_RESULT_FIELD = 'photos'
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
 AUTOTHROTTLE_ENABLED = True

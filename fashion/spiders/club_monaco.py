@@ -22,11 +22,11 @@ from fashion.items import FashionItem
 
 class ClubMonacoSpider(CrawlSpider):
     name = "club_monaco"
-    start_urls = ['http://www.clubmonaco.com/home/index.jsp']
+    start_urls = ['http://www.clubmonaco.com/category/index.jsp?categoryId=12243591&ab=global_men']
 
     rules = [
         Rule(
-            LinkExtractor(restrict_xpaths='//div[@class="flyout-header-menu"]//ul/li/a'),
+            LinkExtractor(restrict_xpaths='//ul[@class="mlp-subLinks"]/li/a'),
             callback='parse_start_url',
             follow=True
         ),
@@ -71,10 +71,6 @@ class ClubMonacoSpider(CrawlSpider):
         for size in self.driver.find_elements_by_xpath('//fieldset[@id="sizeContainer"]/ul/li'):
             sizes.append(size.text)
         photos = []
-        # for photo in self.driver.find_elements_by_xpath('//div[@class="carousel-wrapper"]//img'):
-        for photo in self.driver.find_elements_by_xpath('//ul[@id="alternate-images"]/li//img'):
-            if photo.get_attribute('src'):
-                photos.append(photo.get_attribute('src'))
         for photo_border in self.driver.find_elements_by_xpath('//ul[@id="alternate-images"]/li/div[@class="image-border"]'):
             try:
                 photo_border.click()
@@ -85,7 +81,7 @@ class ClubMonacoSpider(CrawlSpider):
                 if big_photo.get_attribute('src'):
                     photos.append(big_photo.get_attribute('src'))
         loader.add_value('sizes', sizes)
-        loader.add_value('photos', photos)
+        loader.add_value('photo_urls', photos)
         loader.add_xpath('colors', '//fieldset[@id="colorContainer"]/ul[@class="swatches"]/li[@class="swatch"]/text()')
         loader.add_value('link', response.url)
         details_p = response.xpath('//div[@id="tab-details"]/p/text()').extract()

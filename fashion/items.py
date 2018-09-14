@@ -7,7 +7,7 @@
 import re
 import scrapy
 
-from scrapy.loader.processors import Join, Compose, MapCompose, TakeFirst
+from scrapy.loader.processors import Join, Compose, MapCompose, TakeFirst, SelectJmes
 from w3lib.html import remove_tags
 
 
@@ -29,7 +29,7 @@ def clean_price(value):
 class JoinStripped(Join):
     """Join a stripped list of strings."""
 
-    def __call__(self, values, separator=', '):
+    def __call__(self, values, separator=','):
         stripped_text = [strip_non_unicode(t) for t in values if t.strip()]
         single_string = separator.join(stripped_text)
         return single_string.strip()
@@ -53,10 +53,17 @@ class PriceField(scrapy.Field):
         super(PriceField, self).__init__(*args, **kwargs)
 
 
+class PhotoField(scrapy.Field):
+    def __init__(self, *args, **kwargs):
+        kwargs['input_processor'] = MapCompose(select_path)
+        kwargs['output_processor'] = JoinUnique()
+        super(PhotoField, self).__init__(*args, **kwargs)
+
+
 class JoinUnique(Join):
     """Join a stripped list of strings."""
 
-    def __call__(self, values, separator=', '):
+    def __call__(self, values, separator=','):
         stripped_text = [strip_non_unicode(t) for t in values if t.strip()]
         uniq_list = []
         for elem in stripped_text:
@@ -68,14 +75,15 @@ class JoinUnique(Join):
 
 class FashionItem(scrapy.Item):
     """Item for fashion website."""
-    photos = StrippedField(output_processor=JoinUnique())
+    photos = scrapy.Field()
+    photo_urls = scrapy.Field()
     record_id = scrapy.Field(output_processor=TakeFirst())
     material = StrippedField()
     fit = StrippedField()
     title = StrippedField()
     price = PriceField()
     sizes = StrippedField(output_processor=JoinUnique())
-    colors = StrippedField()
+    colors = StrippedField(output_processor=TakeFirst())
     link = StrippedField()
     details = StrippedField()
     brand_title = StrippedField()
