@@ -1,3 +1,4 @@
+import hashlib
 import requests
 
 from lxml import etree
@@ -7,6 +8,8 @@ from nameko.rpc import rpc
 
 class CrawlService:
     name = "crawl_service"
+
+    FORBIDDEN_LINKS = ['/']
 
     @rpc
     def discover(self, url):
@@ -30,22 +33,23 @@ class CrawlService:
         """Assemble paths results to a structured format."""
         results = dict()
         for path in paths:
+            tag = tree.xpath(path)[0].tag
+            hashed_path = hashlib.blake2s(path.encode('UTF-8'), digest_size=4).hexdigest()
+            tag_key = '%s_%s' % (tag, hashed_path)
             # Find <a> element.
             link_xpath = '%s//a' % path
             elem_results = []
             # Gather the <a> element values.
             for elem in tree.xpath(link_xpath):
-                if elem.text and elem.get('href'):
+                href = elem.get('href')
+                if elem.text and href and href not in self.FORBIDDEN_LINKS:
                     elem_results.append({
                         'href': elem.get('href'),
                         'text': elem.text.strip()
                     })
             # Store results to return full values.
             if elem_results:
-                tag = tree.xpath(path)[0].tag
-                tag_index = len(results[ tag ]) if tag in results else 0
-                tag_key = '%s_%s' % (tag, tag_index)
-                results[tag_key] = elem_results
+                results[ tag_key ] = elem_results
         return results
 
     def discover_paths(self, tree):

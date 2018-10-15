@@ -13,8 +13,8 @@ class GatewayService:
     @http('POST', '/discover')
     def discover(self, request):
         data = json.loads(request.get_data(as_text=True))
-        crawl_result = self.crawl_rpc.get(data.get('url'))
-        return json.dumps(crawl_result)
+        result = self.crawl_rpc.discover(data.get('url'))
+        return json.dumps(result)
 
     @http('POST', '/crawl')
     def crawl(self, request):

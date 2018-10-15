@@ -20,8 +20,8 @@ class CrawlServiceTest(unittest.TestCase):
     def test_assemble_paths(self):
         html_content = '<div><ul><li><a href="/abc">foo</a></li></ul></div>'
         tree = etree.fromstring(html_content).getroottree()
-        expected_results = { 'ul_0': [ { 'text': 'foo', 'href': '/abc' } ] }
-        assert self.service.assemble_paths(tree, [ '/div/ul' ]) == expected_results
+        expected_results = { 'ul_3bff4e27': [ { 'text': 'foo', 'href': '/abc' } ] }
+        self.assertEqual(self.service.assemble_paths(tree, [ '/div/ul' ]), expected_results)
 
 
 if __name__ == '__main__':
