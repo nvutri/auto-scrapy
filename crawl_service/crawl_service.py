@@ -28,9 +28,34 @@ class CrawlService:
         }
 
     @rpc
-    def crawl(self, page_id, template_id):
-        # TODO (tri): crawl a given page_id.
-        pass
+    def crawl(self, urls, template):
+        results = list()
+        for url in urls:
+            data = self.crawl_single(url, template)
+            results.append({
+                'url': url,
+                'data': data
+            })
+        return {
+            'status': 'done',
+            'results': results
+        }
+
+    def crawl_single(self, url, template):
+        tree = html.fromstring(requests.get(url).content)
+        results = dict()
+        for path in template:
+            values = []
+            tag = None
+            for elem in tree.xpath(path):
+                tag = elem.tag
+                if elem.text and elem.text.strip():
+                    values.append(elem.text_content().strip())
+            if tag and values:
+                path_id = CrawlService.generate_path_id(path)
+                tag_key = '%s_%s' % (tag, path_id)
+                results[ tag_key ] = values
+        return results
 
     @rpc
     def get(self, page_id):
