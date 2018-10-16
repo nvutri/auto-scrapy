@@ -18,7 +18,14 @@ class CrawlService:
         html_tree = html.fromstring(html_content)
         tree = html_tree.getroottree()
         paths = self.discover_paths(tree)
-        return self.assemble_paths(tree, paths)
+        results = self.assemble_paths(tree, paths)
+        page_id = CrawlService.generate_path_id(url)
+        return  {
+            'status': 'done',
+            'url': url,
+            'page_id': page_id,
+            'results': results
+        }
 
     @rpc
     def crawl(self, page_id, template_id):

@@ -15,7 +15,7 @@ class CrawlServiceTest(unittest.TestCase):
         html_content = '<div><ul><li><a href="/abc">foo</a></li></ul></div>'
         tree = etree.fromstring(html_content).getroottree()
         expected_results = [ '/div/ul' ]
-        assert self.service.discover_paths(tree) == expected_results
+        self.assertEqual(self.service.discover_paths(tree), expected_results)
 
     def test_assemble_paths(self):
         html_content = '<div><ul><li><a href="/abc">foo</a></li></ul></div>'
