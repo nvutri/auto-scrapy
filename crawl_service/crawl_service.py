@@ -9,7 +9,8 @@ from nameko.rpc import rpc
 class CrawlService:
     name = "crawl_service"
 
-    FORBIDDEN_LINKS = ['/']
+    FORBIDDEN_LINKS = [ '/' ]
+    PATH_ID_DIGEST_SIZE = 4
 
     @rpc
     def discover(self, url):
@@ -34,8 +35,8 @@ class CrawlService:
         results = dict()
         for path in paths:
             tag = tree.xpath(path)[0].tag
-            hashed_path = hashlib.blake2s(path.encode('UTF-8'), digest_size=4).hexdigest()
-            tag_key = '%s_%s' % (tag, hashed_path)
+            path_id = CrawlService.generate_path_id(path)
+            tag_key = '%s_%s' % (tag, path_id)
             # Find <a> element.
             link_xpath = '%s//a' % path
             elem_results = []
@@ -68,3 +69,8 @@ class CrawlService:
             if p in new_path:
                 return False
         return True
+
+    @staticmethod
+    def generate_path_id(path):
+        # Create a deterministic ID for the path.
+        return hashlib.blake2s(path.encode('UTF-8'), digest_size=CrawlService.PATH_ID_DIGEST_SIZE).hexdigest()
