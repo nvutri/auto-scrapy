@@ -32,26 +32,17 @@ class CrawlService:
         }
 
     @rpc
-    def crawl(self, urls):
-        xpaths = self.templates_rpc.create_from_diff(urls[0], urls[1])
-        logging.info(xpaths)
-        results = list()
-        for url in urls:
-            logging.info(url)
-            data = self.crawl_single(url, template)
-            results.append({
-                'url': url,
-                'data': data
-            })
-        return {
-            'status': 'done',
-            'results': results
-        }
-
-    @rpc
-    def crawl_single(self, url, template):
-        tree = html.fromstring(requests.get(url).content)
+    def crawl(self, url):
+        """Crawl a page into data."""
+        # Crawl the page to acquire the data.
+        page_content = requests.get(url).content
+        # Get the right template for the template service.
+        template = self.templates_rpc.create(url, page_content)
+        logging.info(template)
+        # Parse the page and follow the paths.
+        tree = html.fromstring(page_content)
         results = dict()
+        # Iterate through valuable paths and gather the right data.
         for path in template:
             values = []
             tag = None
@@ -63,7 +54,11 @@ class CrawlService:
                 path_id = CrawlService.generate_path_id(path)
                 tag_key = '%s_%s' % (tag, path_id)
                 results[ tag_key ] = values
-        return results
+        return {
+            'status': 'done',
+            'url': url,
+            'results': results
+        }
 
     @rpc
     def get(self, page_id):

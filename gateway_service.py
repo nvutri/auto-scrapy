@@ -20,11 +20,5 @@ class GatewayService:
     @http('POST', '/crawl')
     def crawl(self, request):
         data = json.loads(request.get_data(as_text=True))
-        urls = data.get('urls')
-        if len(urls) < 2:
-            return {
-                'status': 'error',
-                'msg': 'must provide at least 2 urls'
-            }
-        result = self.crawl_rpc.crawl(urls=urls)
+        result = self.crawl_rpc.crawl(url=data.get('url'))
         return json.dumps(result)

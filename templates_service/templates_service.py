@@ -1,4 +1,5 @@
 import requests
+import logging
 
 from lxml import html
 from nameko.rpc import rpc
@@ -9,25 +10,28 @@ class TemplatesService:
     name = "templates_service"
 
     @rpc
-    def create(self, url):
-        tree = html.fromstring(requests.get(url).content)
-        link_urls = list(map(lambda elem: elem.get('href'), tree.xpath('//a')))
+    def create(self, url, page_content=None):
+        if not page_content:
+            page_content = requests.get(url).content
+        link_urls = self.find_link_urls(root_url=url, page_content=page_content)
         similar_links = self.search_similar_links(root_url=url, urls=link_urls)
-        similar_url = similar_links[ 0 ]
-        return self.create_from_diff(url, similar_link)
+        similar_urls = list(map(lambda x: x[ 0 ], similar_links))
+        similar_urls = sorted(similar_urls, reverse=True)
+        similar_url = similar_urls[ 0 ]
+        logging.info( 'ROOT_URL: %s' % url )
+        logging.info( 'SIMILAR_URL: %s' % similar_url )
+        return self.create_from_diff(url, similar_url)
 
     @rpc
-    def create_from_diff(self, url1, url2):
-        tree1 = html.fromstring(requests.get(url1).content)
-        tree2 = html.fromstring(requests.get(url2).content)
+    def create_from_diff(self, url1, url2, page_content1=None, page_content2=None):
+        tree1 = html.fromstring(page_content1 or requests.get(url1).content)
+        tree2 = html.fromstring(page_content2 or requests.get(url2).content)
         xpaths = self.diff_html(tree1, tree2)
         return list(set(xpaths))
 
-    def diff_html(self, elem1, elem2, paths=None):
+    def diff_html(self, elem1, elem2, paths=[]):
         """Run a diff on 2 element trees."""
         result = []
-        if not paths:
-            paths = [ elem1.tag ]
         # Check to see if this is the diff xpath.
         if elem1.text and elem1.text != elem2.text and elem1.tag != 'script':
             result.append('/'.join(paths))
@@ -57,6 +61,7 @@ class TemplatesService:
         """Search URL that are similar to root_urls."""
         scores = [ (url, self.score_url_similarity( root_url, url )) for url in urls ]
         max_score = max(scores, key=lambda x: x[1])
+        logging.info(max_score)
         return list(filter(lambda x: x[1] == max_score[1], scores))
 
     def score_url_similarity(self, url1, url2):
@@ -65,7 +70,7 @@ class TemplatesService:
         parse2 = urlparse(url2)
         if parse1.netloc != parse2.netloc:
             return 0
-        num_same = 1
+        num_same = 0
         path1 = parse1.path.split('/')
         path2 = parse2.path.split('/')
         path1 = list(filter(lambda x: x != '', path1))
@@ -74,5 +79,18 @@ class TemplatesService:
             for p1, p2 in zip(path1, path2):
                 if p1 == p2:
                     num_same += 1
-            return num_same / max(len(path1), len(path2))
+            return num_same / len(path1)
         return 0
+
+    def find_link_urls(self, root_url, page_content):
+        tree = html.fromstring(page_content)
+        url_parse = urlparse( root_url )
+        url_domain = '%s://%s' % (url_parse.scheme, url_parse.netloc)
+        link_urls = []
+        for elem in tree.xpath('//a'):
+            href = elem.get('href')
+            if href:
+                if not urlparse(href).netloc:
+                    href = '%s%s' % (url_domain, href)
+                link_urls.append(href)
+        return link_urls
