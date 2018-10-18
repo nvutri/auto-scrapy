@@ -2,15 +2,19 @@ import requests
 
 from lxml import html
 from nameko.rpc import rpc
+from urllib.parse import urlparse
 
 
 class TemplatesService:
     name = "templates_service"
 
     @rpc
-    def create(self, page_url):
-        # TODO (tri): run a template creation process for the given page url
-        pass
+    def create(self, url):
+        tree = html.fromstring(requests.get(url).content)
+        link_urls = list(map(lambda elem: elem.get('href'), tree.xpath('//a')))
+        similar_links = self.search_similar_links(root_url=url, urls=link_urls)
+        similar_url = similar_links[ 0 ]
+        return self.create_from_diff(url, similar_link)
 
     @rpc
     def create_from_diff(self, url1, url2):
@@ -19,9 +23,11 @@ class TemplatesService:
         xpaths = self.diff_html(tree1, tree2)
         return list(set(xpaths))
 
-    def diff_html(self, elem1, elem2, paths=[]):
+    def diff_html(self, elem1, elem2, paths=None):
         """Run a diff on 2 element trees."""
         result = []
+        if not paths:
+            paths = [ elem1.tag ]
         # Check to see if this is the diff xpath.
         if elem1.text and elem1.text != elem2.text and elem1.tag != 'script':
             result.append('/'.join(paths))
@@ -46,3 +52,27 @@ class TemplatesService:
             if child1.tag == child2.tag:
                 if ( not require_attrib ) or ( require_attrib and child1.attrib == child2.attrib ):
                     return child2
+
+    def search_similar_links(self, root_url, urls):
+        """Search URL that are similar to root_urls."""
+        scores = [ (url, self.score_url_similarity( root_url, url )) for url in urls ]
+        max_score = max(scores, key=lambda x: x[1])
+        return list(filter(lambda x: x[1] == max_score[1], scores))
+
+    def score_url_similarity(self, url1, url2):
+        """Calculate a score that represent how closely the 2 URLs are matching."""
+        parse1 = urlparse(url1)
+        parse2 = urlparse(url2)
+        if parse1.netloc != parse2.netloc:
+            return 0
+        num_same = 1
+        path1 = parse1.path.split('/')
+        path2 = parse2.path.split('/')
+        path1 = list(filter(lambda x: x != '', path1))
+        path2 = list(filter(lambda x: x != '', path2))
+        if path1 and path2:
+            for p1, p2 in zip(path1, path2):
+                if p1 == p2:
+                    num_same += 1
+            return num_same / max(len(path1), len(path2))
+        return 0

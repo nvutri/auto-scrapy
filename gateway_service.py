@@ -1,4 +1,5 @@
 import json
+import logging
 
 from nameko.rpc import RpcProxy
 from nameko.web.handlers import http
@@ -25,6 +26,5 @@ class GatewayService:
                 'status': 'error',
                 'msg': 'must provide at least 2 urls'
             }
-        xpaths = self.templates_rpc.create_from_diff(urls[0], urls[1])
-        result = self.crawl_rpc.crawl(urls=urls, template=xpaths)
+        result = self.crawl_rpc.crawl(urls=urls)
         return json.dumps(result)

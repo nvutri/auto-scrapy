@@ -1,13 +1,17 @@
 import hashlib
+import logging
 import requests
 
 from lxml import etree
 from lxml import html
 from nameko.rpc import rpc
+from nameko.rpc import RpcProxy
 
 
 class CrawlService:
     name = "crawl_service"
+
+    templates_rpc = RpcProxy('templates_service')
 
     FORBIDDEN_LINKS = [ '/' ]
     PATH_ID_DIGEST_SIZE = 4
@@ -28,9 +32,12 @@ class CrawlService:
         }
 
     @rpc
-    def crawl(self, urls, template):
+    def crawl(self, urls):
+        xpaths = self.templates_rpc.create_from_diff(urls[0], urls[1])
+        logging.info(xpaths)
         results = list()
         for url in urls:
+            logging.info(url)
             data = self.crawl_single(url, template)
             results.append({
                 'url': url,
@@ -41,6 +48,7 @@ class CrawlService:
             'results': results
         }
 
+    @rpc
     def crawl_single(self, url, template):
         tree = html.fromstring(requests.get(url).content)
         results = dict()
