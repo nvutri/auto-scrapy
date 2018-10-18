@@ -49,7 +49,13 @@ class CrawlService:
             for elem in tree.xpath(path):
                 tag = elem.tag
                 if elem.text and elem.text.strip():
-                    values.append(elem.text_content().strip())
+                    if tag == 'a':
+                        values.append({
+                            'href': elem.get('href'),
+                            'text': elem.text_content().strip()
+                        })
+                    else:
+                        values.append(elem.text_content().strip())
             if tag and values:
                 path_id = CrawlService.generate_path_id(path)
                 tag_key = '%s_%s' % (tag, path_id)
