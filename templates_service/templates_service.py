@@ -16,7 +16,7 @@ class TemplatesService:
         link_urls = self.find_link_urls(root_url=url, page_content=page_content)
         similar_links = self.search_similar_links(root_url=url, urls=link_urls)
         similar_urls = list(map(lambda x: x[ 0 ], similar_links))
-        similar_urls = sorted(similar_urls, reverse=True)
+        similar_urls = sorted(similar_urls)
         similar_url = similar_urls[ 0 ]
         logging.info( 'ROOT_URL: %s' % url )
         logging.info( 'SIMILAR_URL: %s' % similar_url )
@@ -92,5 +92,6 @@ class TemplatesService:
             if href:
                 if not urlparse(href).netloc:
                     href = '%s%s' % (url_domain, href)
-                link_urls.append(href)
+                if href != root_url:
+                    link_urls.append(href)
         return link_urls
