@@ -17,4 +17,4 @@ EXPOSE 8000
 # ENV NAME World
 
 # Run app.py when the container launches
-CMD ["nameko", "run", "gateway_service", "--broker", "amqp://guest:guest@localhost"]
+CMD ["nameko", "run", "crawl_service", "--broker", "amqp://guest:guest@localhost"]

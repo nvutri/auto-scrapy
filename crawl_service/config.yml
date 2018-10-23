@@ -1,4 +1,4 @@
-AMQP_URI: 'pyamqp://guest:guest@localhost'
+# AMQP_URI: 'pyamqp://guest:guest@localhost'
 # WEB_SERVER_ADDRESS: '0.0.0.0:8000'
 rpc_exchange: 'nameko-rpc'
 max_workers: 10
