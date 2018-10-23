@@ -17,4 +17,4 @@ RUN pip install --trusted-host pypi.python.org -r requirements.txt
 # ENV NAME World
 
 # Run app.py when the container launches
-CMD ["nameko", "run", "templates_service", "--broker", "amqp://guest:guest@localhost"]
+CMD ["nameko", "run", "templates_service", "--broker", "amqp://guest:guest@rabbitmq"]
