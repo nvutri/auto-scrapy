@@ -23,6 +23,23 @@ class CrawlServiceTest(unittest.TestCase):
         expected_results = { 'ul_3bff4e27': [ { 'text': 'foo', 'href': '/abc' } ] }
         self.assertEqual(self.service.assemble_paths(tree, [ '/div/ul' ]), expected_results)
 
+    def test_crawl_content(self):
+        html_content = '''
+            <body>
+                <div><ul><li><a href="/abc">foo</a></li></ul></div>
+                <div><span>bar</span></div>
+                <div><table></table></div>
+            </body>
+        '''
+        templates = [
+            'div/ul/li/a',
+            'div/span'
+        ]
+        expected_results = {
+            'a_88000be6': [ { 'text': 'foo', 'href': '/abc' } ],
+            'span_6d02cf61': [ 'bar' ]
+        }
+        self.assertEqual(self.service._crawl_content(html_content, templates), expected_results)
 
 if __name__ == '__main__':
     unittest.main()

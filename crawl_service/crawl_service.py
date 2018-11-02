@@ -34,32 +34,15 @@ class CrawlService:
     @rpc
     def crawl(self, url):
         """Crawl a page into data."""
+        # Get the right template for the template service.
+        template = self.templates_rpc.create(url)
+        logging.info(template)
         # Crawl the page to acquire the data.
         page_content = requests.get(url).content
-        # Get the right template for the template service.
-        template = self.templates_rpc.create(url, page_content)
-        logging.info(template)
-        # Parse the page and follow the paths.
-        tree = html.fromstring(page_content)
-        results = dict()
-        # Iterate through valuable paths and gather the right data.
-        for path in template:
-            values = []
-            tag = None
-            for elem in tree.xpath(path):
-                tag = elem.tag
-                if elem.text and elem.text.strip():
-                    if tag == 'a':
-                        values.append({
-                            'href': elem.get('href'),
-                            'text': elem.text_content().strip()
-                        })
-                    else:
-                        values.append(elem.text_content().strip())
-            if tag and values:
-                path_id = CrawlService.generate_path_id(path)
-                tag_key = '%s_%s' % (tag, path_id)
-                results[ tag_key ] = values
+        results = self._crawl_content(
+            page_content=page_content,
+            template=template,
+        )
         return {
             'status': 'done',
             'url': url,
@@ -110,6 +93,30 @@ class CrawlService:
             if p in new_path:
                 return False
         return True
+
+    def _crawl_content(self, page_content, template):
+        # Parse the page and follow the paths.
+        tree = html.fromstring(page_content)
+        results = dict()
+        # Iterate through valuable paths and gather the right data.
+        for path in template:
+            values = []
+            tag = None
+            for elem in tree.xpath(path):
+                tag = elem.tag
+                if elem.text and elem.text.strip():
+                    if tag == 'a':
+                        values.append({
+                            'href': elem.get('href'),
+                            'text': elem.text_content().strip()
+                        })
+                    else:
+                        values.append(elem.text_content().strip())
+            if tag and values:
+                path_id = CrawlService.generate_path_id(path)
+                tag_key = '%s_%s' % (tag, path_id)
+                results[ tag_key ] = values
+        return results
 
     @staticmethod
     def generate_path_id(path):

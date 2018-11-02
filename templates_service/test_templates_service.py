@@ -10,6 +10,7 @@ class TemplatesServiceTest(unittest.TestCase):
 
     def setUp(self):
         self.service = worker_factory(TemplatesService)
+        self.maxDiff = None
 
     def test_diff_html_acquire_new_paths(self):
         html1_content = '<div><ul><li><a href="/abc">foo1</a></li></ul></div>'
@@ -48,11 +49,11 @@ class TemplatesServiceTest(unittest.TestCase):
         self.assertEqual(self.service.score_url_similarity(url1, url2), 1/3)
 
     def test_search_similar_links(self):
-        url = 'http://vnn.vn/abc/def/jkl/'
+        url = 'http://vnn.vn/abc/def/jkl/123'
         url1 = 'http://vnn.vn/abc/def/123'
         url2 = 'http://vnn.vn/abc/def/ghi/'
-        url3 = 'http://vnn.vn/abc/def/456/abc/def'
-        expected_results = [ (url1, 2/3), (url2, 2/3), (url3, 2/3) ]
+        url3 = 'http://vnn.vn/abc/def/jkl/abc/def'
+        expected_results = [ (url3, 3/4) ]
         similar_links = self.service.search_similar_links(
             url,
             [ url1, url2, url3 ]
@@ -66,7 +67,7 @@ class TemplatesServiceTest(unittest.TestCase):
             <li><a href="/thoi-su/chinh-tri/abc">foo2</a></li>
             <li><a href="/thoi-su/van-hoa/123">foo3</a></li>
         </ul></div>'''
-        link_urls = self.service.find_link_urls(root_url, page_content)
+        link_urls = self.service._find_link_urls(root_url, page_content)
         expected_results = [
             'http://vietnamnet.vn/thoi-su/van-hoa/',
             'http://vietnamnet.vn/thoi-su/chinh-tri/abc',

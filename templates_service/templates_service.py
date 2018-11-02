@@ -9,23 +9,36 @@ from urllib.parse import urlparse
 class TemplatesService:
     name = "templates_service"
 
-    @rpc
-    def create(self, url, page_content=None):
-        if not page_content:
-            page_content = requests.get(url).content
-        link_urls = self.find_link_urls(root_url=url, page_content=page_content)
-        similar_links = self.search_similar_links(root_url=url, urls=link_urls)
-        similar_urls = list(map(lambda x: x[ 0 ], similar_links))
-        similar_urls = sorted(similar_urls)
-        similar_url = similar_urls[ 0 ]
-        logging.info( 'ROOT_URL: %s' % url )
-        logging.info( 'SIMILAR_URL: %s' % similar_url )
-        return self.create_from_diff(url, similar_url)
+    MAX_COMPARE = 5
+    EXCLUDING_TAGS = ['script', 'style']
 
     @rpc
-    def create_from_diff(self, url1, url2, page_content1=None, page_content2=None):
-        tree1 = html.fromstring(page_content1 or requests.get(url1).content)
-        tree2 = html.fromstring(page_content2 or requests.get(url2).content)
+    def create(self, url):
+        link_urls = self.find_link_urls(root_url=url)
+        link_urls = list(set(link_urls))
+        similar_links = self.search_similar_links(root_url=url, urls=link_urls)
+        similar_urls = list(map(lambda x: x[ 0 ], similar_links))
+        similar_urls = sorted(similar_urls, reverse=True)
+        # Compare potential templates to find the once with maximum diff values.
+        diff_templates = [ ]
+        for similar_url in similar_urls[:self.MAX_COMPARE]:
+            logging.info( 'ROOT_URL: %s' % url )
+            logging.info( 'SIMILAR_URL: %s' % similar_url )
+            diff_templates.append(self.create_from_diff(url, similar_url))
+        # Search for the maximum diff xpaths.
+        diff_templates_length = [ len(diff) for diff in diff_templates ]
+        logging.info('MAX_DIFF: %s' % diff_templates_length)
+        max_diff = max(diff_templates_length)
+        # Select the maximum diff xpaths.
+        for diff_template in diff_templates:
+            if len(diff_template) == max_diff:
+                return diff_template
+        return [ ]
+
+    @rpc
+    def create_from_diff(self, url1, url2):
+        tree1 = html.fromstring(requests.get(url1).content)
+        tree2 = html.fromstring(requests.get(url2).content)
         xpaths = self.diff_html(tree1, tree2)
         return list(set(xpaths))
 
@@ -33,7 +46,7 @@ class TemplatesService:
         """Run a diff on 2 element trees."""
         result = []
         # Check to see if this is the diff xpath.
-        if elem1.text and elem1.text != elem2.text and elem1.tag != 'script':
+        if paths and elem1.text and elem1.text != elem2.text and elem1.tag not in self.EXCLUDING_TAGS:
             result.append('/'.join(paths))
         # Search for similar sub elements to take a diff over 2 trees.
         for idx1, child1 in enumerate(elem1.getchildren()):
@@ -82,7 +95,11 @@ class TemplatesService:
             return num_same / len(path1)
         return 0
 
-    def find_link_urls(self, root_url, page_content):
+    def find_link_urls(self, root_url):
+        page_content = requests.get(root_url).content
+        return self._find_link_urls(root_url=root_url, page_content=page_content)
+
+    def _find_link_urls(self, root_url, page_content):
         tree = html.fromstring(page_content)
         url_parse = urlparse( root_url )
         url_domain = '%s://%s' % (url_parse.scheme, url_parse.netloc)
@@ -93,5 +110,7 @@ class TemplatesService:
                 if not urlparse(href).netloc:
                     href = '%s%s' % (url_domain, href)
                 if href != root_url:
-                    link_urls.append(href)
+                    parse = urlparse(href)
+                    if parse.netloc and parse.scheme:
+                        link_urls.append(href)
         return link_urls
