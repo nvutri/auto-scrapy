@@ -18,13 +18,13 @@ class TemplatesService:
         link_urls = list(set(link_urls))
         similar_links = self.search_similar_links(root_url=url, urls=link_urls)
         similar_urls = list(map(lambda x: x[ 0 ], similar_links))
-        similar_urls = sorted(similar_urls, reverse=True)
+        similar_urls = list(set(similar_urls))
+        similar_urls = sorted(similar_urls, reverse=True, key=lambda x: len(x))
         # Compare potential templates to find the once with maximum diff values.
         diff_templates = [ ]
+        root_page_content = requests.get(url).content
         for similar_url in similar_urls[:self.MAX_COMPARE]:
-            logging.info( 'ROOT_URL: %s' % url )
-            logging.info( 'SIMILAR_URL: %s' % similar_url )
-            diff_templates.append(self.create_from_diff(url, similar_url))
+            diff_templates.append(self.create_from_diff(url, similar_url, page_content_1=root_page_content))
         # Search for the maximum diff xpaths.
         diff_templates_length = [ len(diff) for diff in diff_templates ]
         logging.info('MAX_DIFF: %s' % diff_templates_length)
@@ -36,11 +36,13 @@ class TemplatesService:
         return [ ]
 
     @rpc
-    def create_from_diff(self, url1, url2):
-        tree1 = html.fromstring(requests.get(url1).content)
+    def create_from_diff(self, url1, url2, page_content_1=None):
+        tree1 = html.fromstring( page_content_1 or requests.get(url1).content )
         tree2 = html.fromstring(requests.get(url2).content)
         xpaths = self.diff_html(tree1, tree2)
-        return list(set(xpaths))
+        unique_xpaths = list(set(xpaths))
+        print(url2, len(unique_xpaths))
+        return unique_xpaths
 
     def diff_html(self, elem1, elem2, paths=[]):
         """Run a diff on 2 element trees."""
@@ -73,6 +75,7 @@ class TemplatesService:
     def search_similar_links(self, root_url, urls):
         """Search URL that are similar to root_urls."""
         scores = [ (url, self.score_url_similarity( root_url, url )) for url in urls ]
+        logging.info(scores)
         max_score = max(scores, key=lambda x: x[1])
         logging.info(max_score)
         return list(filter(lambda x: x[1] == max_score[1], scores))
@@ -106,11 +109,19 @@ class TemplatesService:
         link_urls = []
         for elem in tree.xpath('//a'):
             href = elem.get('href')
-            if href:
-                if not urlparse(href).netloc:
-                    href = '%s%s' % (url_domain, href)
-                if href != root_url:
-                    parse = urlparse(href)
-                    if parse.netloc and parse.scheme:
-                        link_urls.append(href)
+            # Skip if this does not have a link.
+            if not href:
+                continue
+            elem_url_parse = urlparse(href)
+            # Skip the URL if it does not belong to the same domain.
+            if elem_url_parse.netloc and elem_url_parse.netloc != url_parse.netloc:
+                continue
+            # Update the href, only include the path.
+            elem_path = elem_url_parse.path
+            if elem_path:
+                if elem_path[ 0 ] != '/':
+                    elem_path = '/%s' % elem_path
+                href = '%s%s' % (url_domain, elem_path)
+                if href.strip('/') != root_url.strip('/'):
+                    link_urls.append(href)
         return link_urls

@@ -75,6 +75,20 @@ class TemplatesServiceTest(unittest.TestCase):
         ]
         self.assertListEqual(link_urls, expected_results)
 
+    def test_find_link_urls_same_path(self):
+        root_url = 'http://vietnamnet.vn/vn/thoi-su/chinh-tri/vn'
+        page_content = '''<div><ul>
+            <li><a href="/vn/thoi-su/chinh-tri/vn?abc">foo1</a></li>
+            <li><a href="/vn/thoi-su/chinh-tri/vn/?def">foo2</a></li>
+            <li><a href="http://vietnamnet.vn/vn/thoi-su/chinh-tri/vn/?ghi">foo2</a></li>
+            <li><a href="/thoi-su/van-hoa/123">foo3</a></li>
+        </ul></div>'''
+        link_urls = self.service._find_link_urls(root_url, page_content)
+        expected_results = [
+            'http://vietnamnet.vn/thoi-su/van-hoa/123'
+        ]
+        self.assertListEqual(link_urls, expected_results)
+
 
 if __name__ == '__main__':
     unittest.main()
