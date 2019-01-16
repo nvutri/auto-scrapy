@@ -1,0 +1,13 @@
+{
+  "status": "done",
+  "publicPath": "http://localhost:3000/assets/bundles/",
+  "chunks": {
+    "main": [
+      {
+        "name": "main-20648878020789a13baf.js",
+        "publicPath": "http://localhost:3000/assets/bundles/main-20648878020789a13baf.js",
+        "path": "/Users/nvutri/workspace/smarpy/frontend/assets/bundles/main-20648878020789a13baf.js"
+      }
+    ]
+  }
+}

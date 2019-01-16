@@ -1,0 +1,50 @@
+{
+  "name": "frontend_src",
+  "version": "1.0.0",
+  "description": "ReactJS Components for Case Review App",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "webpack-dev-server --config ./webpack.local.config.js",
+    "dist": "webpack --config ./webpack.prod.config.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "babel-polyfill": "^6.23.0",
+    "crossfilter2": "^1.4.0",
+    "isomorphic-fetch": "^2.2.1",
+    "jest": "^20.0.4",
+    "lodash.foreach": "^4.5.0",
+    "lodash.map": "^4.6.0",
+    "lodash.mapvalues": "^4.6.0",
+    "lodash.omit": "^4.5.0",
+    "moment": "^2.18.1",
+    "react-bootstrap": "^0.32.4",
+    "react-bootstrap-table": "^4.3.1",
+    "prop-types": "^15.5.10",
+    "react": "^15.5.4",
+    "react-dom": "^15.5.4",
+    "react-redux": "^5.0.5",
+    "react-show-more": "^2.0.0",
+    "redux": "^3.6.0",
+    "redux-thunk": "^2.2.0",
+    "url-parse": "^1.4.3",
+    "webpack": "^2.5.1"
+  },
+  "devDependencies": {
+    "babel": "^6.23.0",
+    "babel-core": "^6.24.1",
+    "babel-eslint": "^7.2.3",
+    "babel-loader": "^7.0.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "eslint": "^3.19.0",
+    "eslint-config-airbnb": "^15.0.1",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-jsx-a11y": "^5.0.3",
+    "eslint-plugin-react": "^7.0.1",
+    "react-hot-loader": "^1.3.1",
+    "webpack-bundle-tracker": "^0.2.0",
+    "webpack-dev-server": "^2.4.5"
+  }
+}

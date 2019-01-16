@@ -1,8 +1,15 @@
 import json
 import logging
 
+from jinja2 import Environment, FileSystemLoader
 from nameko.rpc import RpcProxy
 from nameko.web.handlers import http
+from os import path
+from werkzeug.wrappers import Response
+
+
+TEMPLATE_PATH = path.join(path.dirname(__file__), 'templates')
+jinja_env = Environment(loader=FileSystemLoader(TEMPLATE_PATH))
 
 
 class GatewayService:
@@ -22,3 +29,14 @@ class GatewayService:
         data = json.loads(request.get_data(as_text=True))
         result = self.crawl_rpc.crawl(url=data.get('url'))
         return json.dumps(result)
+
+    @http('GET', '/')
+    def index(self, request):
+        webpack = json.loads(open('frontend/webpack-stats.json').read())
+        if webpack['status'] == 'done':
+            context = { 'webpack': webpack['chunks']['main'][0]['publicPath'] }
+            return Response(
+                jinja_env.get_template('index.html').render(**context),
+                mimetype='text/html'
+            )
+        return Response()
