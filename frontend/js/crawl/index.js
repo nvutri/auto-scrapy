@@ -6,7 +6,7 @@ import { createStore, applyMiddleware } from 'redux';
 
 import { loadData } from './actions';
 import { reducer, initialState } from './reducers'
-import CrawlTable from './crawl_table';
+import App from './app';
 
 const store = createStore(
   reducer,
@@ -14,15 +14,10 @@ const store = createStore(
   applyMiddleware(thunkMiddleware),
 );
 
-const CaseCrawl = ( ) => {
-  store.dispatch(loadData(initialState.page, initialState.sizePerPage));
-  ReactDOM.render(
-    <Provider store={ store }>
-      <CrawlTable/>
-    </Provider>,
-    document.getElementById('crawl-table')
-  );
-};
-
-
-export default CaseCrawl;
+  // store.dispatch(loadData(initialState.page, initialState.sizePerPage));
+ReactDOM.render(
+  <Provider store={ store }>
+    <App/>
+  </Provider>,
+  document.getElementById('root')
+);
