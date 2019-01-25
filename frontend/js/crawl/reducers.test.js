@@ -2,6 +2,7 @@ import moment from 'moment'
 
 import { reducer } from './reducers';
 import {
+  setUrl, SET_URL,
   setData, SET_DATA,
   setPage, SET_PAGE,
   setSizePerPage, SET_SIZE_PER_PAGE

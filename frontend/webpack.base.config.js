@@ -3,7 +3,7 @@ var webpack = require('webpack')
 
 module.exports = {
   context: __dirname,
-  entry: ['babel-polyfill', './assets/js/index'],
+  entry: ['babel-polyfill', './js/crawl/index'],
 
   output: {
     path: path.resolve('./assets/bundles/'),

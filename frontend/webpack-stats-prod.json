@@ -1,0 +1,11 @@
+{
+  "status": "done",
+  "chunks": {
+    "main": [
+      {
+        "name": "main-de1634767516018f12ab.js",
+        "path": "./frontend/assets/dist/main-de1634767516018f12ab.js"
+      }
+    ]
+  }
+}

@@ -32,9 +32,9 @@ class GatewayService:
 
     @http('GET', '/')
     def index(self, request):
-        webpack = json.loads(open('frontend/webpack-stats.json').read())
+        webpack = json.loads(open('frontend/webpack-stats-prod.json').read())
         if webpack['status'] == 'done':
-            context = { 'webpack': webpack['chunks']['main'][0]['publicPath'] }
+            context = { 'webpack': webpack['chunks']['main'][0]['path'] }
             return Response(
                 jinja_env.get_template('index.html').render(**context),
                 mimetype='text/html'

@@ -1,8 +1,14 @@
-const SET_DATA = 'SET_DATA';
+const SET_URL = 'SET_URL';
+const SET_CRAWL_DATA = 'SET_CRAWL_DATA';
 
-const setData = (data, page, sizePerPage) => ({
-  type: SET_DATA,
-  data, page, sizePerPage
+const setUrl = (url) => ({
+  type: SET_URL,
+  url
+});
+
+const setCrawlData = (data) => ({
+  type: SET_CRAWL_DATA,
+  data
 });
 
 const loadData = ( page, sizePerPage ) => {
@@ -15,7 +21,22 @@ const loadData = ( page, sizePerPage ) => {
   }
 }
 
+const crawlUrl = ( url ) => {
+  return dispatch => {
+    fetch(`/crawl`, {
+      method: 'post',
+      body: JSON.stringify({'url': url})
+    })
+    .then(response => response.json())
+    .then(function(response) {
+      dispatch(setCrawlData(response.results));
+    });
+  }
+}
+
 export {
   loadData,
-  setData, SET_DATA,
+  crawlUrl,
+  setCrawlData, SET_CRAWL_DATA,
+  setUrl, SET_URL,
 }

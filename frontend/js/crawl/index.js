@@ -14,7 +14,6 @@ const store = createStore(
   applyMiddleware(thunkMiddleware),
 );
 
-  // store.dispatch(loadData(initialState.page, initialState.sizePerPage));
 ReactDOM.render(
   <Provider store={ store }>
     <App/>
