@@ -2,8 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { crawlUrl, setUrl, discoverUrl } from './actions';
-import CrawlTable from './crawl_table';
-import DiscoverTable from './discover_table';
+import CrawlTable from './components/CrawlTable';
+import DiscoverTable from './components/DiscoverTable';
 
 import { Jumbotron, Well, Button, Row, Col, FormControl } from 'react-bootstrap';
 
