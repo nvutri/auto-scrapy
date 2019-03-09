@@ -1,8 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { crawlUrl, setUrl } from './actions';
+import { crawlUrl, setUrl, discoverUrl } from './actions';
 import CrawlTable from './crawl_table';
+import DiscoverTable from './discover_table';
+
 import { Jumbotron, Well, Button, Row, Col, FormControl } from 'react-bootstrap';
 
 const mapStateToProps =({ url, crawl_data }) => ({ url, crawl_data });
@@ -16,17 +18,20 @@ const App = ({ url, crawl_data, dispatch, }) => {
           <FormControl
             type="text"
             value={ url }
-            placeholder="Enter URL"
+            placeholder="Enter Directory URL"
             onChange={ (e) => { dispatch(setUrl(e.target.value)) } }
           />
         </Col>
         <Col md={2}>
-          <Button bsStyle="primary" onClick={ (e) => { dispatch(crawlUrl(url)) } }>Go!</Button>
+          <Button bsStyle="primary" onClick={ (e) => { dispatch(discoverUrl(url)) } }>Discover</Button>
         </Col>
       </Row>
+      <br/>
       <Row>
-        <Col md={1}/>
-        <Col md={10}>
+        <Col md={8}>
+          <DiscoverTable/>
+        </Col>
+        <Col md={4}>
           <Well>
             <CrawlTable/>
           </Well>

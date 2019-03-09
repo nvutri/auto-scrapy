@@ -9,13 +9,10 @@ import { loadData } from './actions';
 const FIRST_PAGE = 1;
 const DOMAIN_REGEX = /http[s]?:\/\/[\w\.]+[\:\d]+\//
 
-const mapStateToProps =
-  ({ crawl_data }) =>
-  ({ crawl_data });
+const mapStateToProps = ({ crawl_data }) => ({ crawl_data });
 
 const CrawlTable = ({ crawl_data, dispatch, }) => {
   const valueFormatter = (cell, row) => {
-    console.log(cell);
     return <ShowMore
       lines={ 3 }
       more='more'

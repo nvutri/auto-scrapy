@@ -1,5 +1,6 @@
 const SET_URL = 'SET_URL';
 const SET_CRAWL_DATA = 'SET_CRAWL_DATA';
+const SET_DISCOVER_DATA = 'SET_DISCOVER_DATA';
 
 const setUrl = (url) => ({
   type: SET_URL,
@@ -8,6 +9,11 @@ const setUrl = (url) => ({
 
 const setCrawlData = (data) => ({
   type: SET_CRAWL_DATA,
+  data
+});
+
+const setDiscoverData = (data) => ({
+  type: SET_DISCOVER_DATA,
   data
 });
 
@@ -34,9 +40,22 @@ const crawlUrl = ( url ) => {
   }
 }
 
+const discoverUrl = ( url ) => {
+  return dispatch => {
+    fetch(`/discover`, {
+      method: 'post',
+      body: JSON.stringify({'url': url})
+    })
+    .then(response => response.json())
+    .then(function(response) {
+      dispatch(setDiscoverData(response.results));
+    });
+  }
+}
+
 export {
   loadData,
-  crawlUrl,
-  setCrawlData, SET_CRAWL_DATA,
+  crawlUrl, setCrawlData, SET_CRAWL_DATA,
+  discoverUrl, setDiscoverData,  SET_DISCOVER_DATA,
   setUrl, SET_URL,
 }
