@@ -4,11 +4,6 @@ import { connect } from 'react-redux';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 import ShowMore from 'react-show-more';
 
-import { loadData } from '../actions';
-
-const FIRST_PAGE = 1;
-const DOMAIN_REGEX = /http[s]?:\/\/[\w\.]+[\:\d]+\//
-
 const mapStateToProps = ({ crawl_data }) => ({ crawl_data });
 
 const CrawlTable = ({ crawl_data, dispatch, }) => {

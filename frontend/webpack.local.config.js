@@ -9,7 +9,7 @@ const webpackDevServerPort = 3000;
 config.entry = [
   `webpack-dev-server/client?http://localhost:${webpackDevServerPort}`,
   'webpack/hot/only-dev-server',
-  './js/crawl/index'
+  './js/index'
 ]
 
 config.output.publicPath = `http://localhost:${webpackDevServerPort}/assets/bundles/`;
