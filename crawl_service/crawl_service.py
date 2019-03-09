@@ -6,6 +6,7 @@ from lxml import etree
 from lxml import html
 from nameko.rpc import rpc
 from nameko.rpc import RpcProxy
+from urllib.parse import urlparse
 
 
 class CrawlService:
@@ -17,18 +18,21 @@ class CrawlService:
     PATH_ID_DIGEST_SIZE = 4
 
     @rpc
-    def discover(self, url):
-        html_content = requests.get(url).content
+    def discover(self, root_url):
+        html_content = requests.get(root_url).content
         html_tree = html.fromstring(html_content)
         tree = html_tree.getroottree()
         paths = self.discover_paths(tree)
-        results = self.assemble_paths(tree, paths)
-        page_id = CrawlService.generate_path_id(url)
-        return  {
+        url_parse = urlparse( root_url )
+        url_domain = '%s://%s' % (url_parse.scheme, url_parse.netloc)
+        url_results = self.assemble_paths(tree, paths, url_domain)
+        page_id = CrawlService.generate_path_id(root_url)
+        return {
             'status': 'done',
-            'url': url,
+            'url': root_url,
+            'domain': url_domain,
             'page_id': page_id,
-            'results': results
+            'results': url_results
         }
 
     @rpc
@@ -54,7 +58,7 @@ class CrawlService:
         # TODO (tri): return data from a crawled page.
         pass
 
-    def assemble_paths(self, tree, paths):
+    def assemble_paths(self, tree, paths, url_domain):
         """Assemble paths results to a structured format."""
         results = dict()
         for path in paths:
@@ -68,8 +72,12 @@ class CrawlService:
             for elem in tree.xpath(link_xpath):
                 href = elem.get('href')
                 if elem.text and href and href not in self.FORBIDDEN_LINKS:
+                    href = elem.get('href')
+                    is_relative_path = len(href) > 0 and href[0] == '/'
+                    if is_relative_path:
+                        href = url_domain + href
                     elem_results.append({
-                        'href': elem.get('href'),
+                        'href': href,
                         'text': elem.text.strip()
                     })
             # Store results to return full values.
