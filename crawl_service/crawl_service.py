@@ -36,6 +36,26 @@ class CrawlService:
         }
 
     @rpc
+    def crawl_urls(self, urls):
+        """Crawl multiple urls into data."""
+        # Get the right template for the template service.
+        template = self.templates_rpc.create_from_urls(urls)
+        # Crawl the page to acquire the data.
+        results = []
+        for url in urls:
+            page_content = requests.get(url).content
+            crawl_content = self._crawl_content(
+                page_content=page_content,
+                template=template,
+            )
+            crawl_content['url'] = url
+            results.append(crawl_content)
+        return {
+            'status': 'done',
+            'results': results
+        }
+
+    @rpc
     def crawl(self, url):
         """Crawl a page into data."""
         # Get the right template for the template service.

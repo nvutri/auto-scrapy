@@ -1,6 +1,8 @@
 const SET_URL = 'SET_URL';
 const SET_CRAWL_DATA = 'SET_CRAWL_DATA';
+const SET_CRAWL_URLS = 'SET_CRAWL_URLS';
 const SET_DISCOVER_DATA = 'SET_DISCOVER_DATA';
+const SET_IS_CRAWLING = 'SET_IS_CRAWLING';
 
 const setUrl = (url) => ({
   type: SET_URL,
@@ -17,6 +19,11 @@ const setDiscoverData = (data) => ({
   data
 });
 
+const setIsCrawling = (value) => ({
+  type: SET_IS_CRAWLING,
+  value
+})
+
 const loadData = ( page, sizePerPage ) => {
   const caseId = document.getElementById('case-id').value;
   return dispatch => {
@@ -27,14 +34,15 @@ const loadData = ( page, sizePerPage ) => {
   }
 }
 
-const crawlUrl = ( url ) => {
+const crawlUrls = ( urls ) => {
   return dispatch => {
     fetch(`/crawl`, {
       method: 'post',
-      body: JSON.stringify({'url': url})
+      body: JSON.stringify({'urls': urls})
     })
     .then(response => response.json())
     .then(function(response) {
+      dispatch(setIsCrawling(false));
       dispatch(setCrawlData(response.results));
     });
   }
@@ -48,14 +56,19 @@ const discoverUrl = ( url ) => {
     })
     .then(response => response.json())
     .then(function(response) {
+      dispatch(setIsCrawling(false));
       dispatch(setDiscoverData(response.results));
+    })
+    .catch( () => {
+      dispatch(setIsCrawling(false));
     });
   }
 }
 
 export {
   loadData,
-  crawlUrl, setCrawlData, SET_CRAWL_DATA,
+  setIsCrawling, SET_IS_CRAWLING,
+  crawlUrls, setCrawlData, SET_CRAWL_DATA, SET_CRAWL_URLS,
   discoverUrl, setDiscoverData,  SET_DISCOVER_DATA,
   setUrl, SET_URL,
 }

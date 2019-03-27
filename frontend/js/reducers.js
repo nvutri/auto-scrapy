@@ -1,4 +1,4 @@
-import { SET_URL, SET_CRAWL_DATA, SET_DISCOVER_DATA } from './actions';
+import { SET_URL, SET_IS_CRAWLING, SET_CRAWL_DATA, SET_CRAWL_URLS, SET_DISCOVER_DATA } from './actions';
 
 const initialState = {
   crawl_data: [],
@@ -7,6 +7,7 @@ const initialState = {
     page: 1,
     sizePerPage: 10,
   },
+  is_crawling: false,
   url: ''
 };
 
@@ -16,18 +17,17 @@ const reducer = (state = initialState, action) => {
       return Object.assign({}, state, {
         url: action.url
       });
-    case SET_CRAWL_DATA:
-      const crawl_data = []
-      Object.keys(action.data).forEach( (key) => {
-        const values = action.data[key].map( (entry) => entry.text ? entry.text : entry );
-        crawl_data.push({
-          id: key,
-          name: key,
-          value: values
-        })
-      });
+    case SET_IS_CRAWLING:
       return Object.assign({}, state, {
-        crawl_data: crawl_data
+          is_crawling: action.value
+        });
+    case SET_CRAWL_URLS:
+      return Object.assign({}, state, {
+        urls: action.urls
+      });
+    case SET_CRAWL_DATA:
+      return Object.assign({}, state, {
+        crawl_data: action.data
       });
     case SET_DISCOVER_DATA:
       const discover_data = []

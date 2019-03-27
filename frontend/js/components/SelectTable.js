@@ -1,13 +1,14 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { crawlUrl } from '../actions';
+import { crawlUrls, setCrawlData, setIsCrawling } from '../actions';
 
 import PropTypes from 'prop-types';
 import { Button, Row, Col, Well } from 'react-bootstrap';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 
 const MIN_CRAWL_ITEMS = 2
+const mapStateToProps = ({ is_crawling }) => ({ is_crawling });
 
 class SelectTable extends Component {
 
@@ -35,8 +36,9 @@ class SelectTable extends Component {
 
   handleClick() {
     const selectedUrls = this.refs.table.state.selectedRowKeys;
-    console.log(selectedUrls);
-    this.props.dispatch(crawlUrl(selectedUrls[0]));
+    this.props.dispatch(setIsCrawling(true));
+    this.props.dispatch(setCrawlData([]));
+    this.props.dispatch(crawlUrls(selectedUrls));
   }
 
   render() {
@@ -47,16 +49,19 @@ class SelectTable extends Component {
       onSelectAll: this.handleSelectAll.bind(this)
     }
     const canCrawl = this.state.numSelected >= MIN_CRAWL_ITEMS;
+    const buttonTitle = canCrawl ?
+      this.props.is_crawling ? 'Crawling...' : 'Get Data!' :
+      `Please select at least ${ MIN_CRAWL_ITEMS } links`;
     return <Well>
       <Row>
         <Col md={2}/>
         <Col md={8}>
           <Button
             onClick={this.handleClick.bind(this)}
-            bsStyle={canCrawl ? 'info' : 'default' }
-            disabled={!canCrawl}
+            bsStyle={canCrawl ? this.props.is_crawling ? 'primary' : 'info' : 'default' }
+            disabled={!canCrawl || this.props.is_crawling }
             block>
-            { canCrawl ? 'Get Data!' : `Please select at least ${ MIN_CRAWL_ITEMS } links`}
+            { buttonTitle }
           </Button>
         </Col>
       </Row>
@@ -69,4 +74,4 @@ class SelectTable extends Component {
   }
 }
 
-export default connect( )( SelectTable );
+export default connect( mapStateToProps )( SelectTable );

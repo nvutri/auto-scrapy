@@ -24,10 +24,10 @@ const DiscoverTable = ({ discover_data, dispatch, }) => {
   }
 
   const tdStyle = { whiteSpace: 'normal' };
-
   return <BootstrapTable
     striped
     data={ discover_data }
+    height='600px'
     expandableRow={ () => true }
     expandComponent={ expandComponent }>
     <TableHeaderColumn isKey dataField='id' hidden={true}>ID</TableHeaderColumn>

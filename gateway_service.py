@@ -27,7 +27,11 @@ class GatewayService:
     @http('POST', '/crawl')
     def crawl(self, request):
         data = json.loads(request.get_data(as_text=True))
-        result = self.crawl_rpc.crawl(url=data.get('url'))
+        result = {}
+        if data.get('url'):
+            result = self.crawl_rpc.crawl(url=data.get('url'))
+        elif data.get('urls'):
+            result = self.crawl_rpc.crawl_urls(urls=data.get('urls'))
         return json.dumps(result)
 
     @http('GET', '/')

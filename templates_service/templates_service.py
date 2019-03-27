@@ -13,18 +13,15 @@ class TemplatesService:
     EXCLUDING_TAGS = ['script', 'style']
 
     @rpc
-    def create(self, url):
-        link_urls = self.find_link_urls(root_url=url)
-        link_urls = list(set(link_urls))
-        similar_links = self.search_similar_links(root_url=url, urls=link_urls)
-        similar_urls = list(map(lambda x: x[ 0 ], similar_links))
-        similar_urls = list(set(similar_urls))
-        similar_urls = sorted(similar_urls, reverse=True, key=lambda x: len(x))
-        # Compare potential templates to find the once with maximum diff values.
+    def create_from_urls(self, urls, main_url=None):
+        """Create template from URLs comparison."""
+        if main_url is None:
+            main_url = urls[ 0 ]
+        # Compare potential templates to find the one with maximum diff values.
         diff_templates = [ ]
-        root_page_content = requests.get(url).content
-        for similar_url in similar_urls[:self.MAX_COMPARE]:
-            diff_templates.append(self.create_from_diff(url, similar_url, page_content_1=root_page_content))
+        root_page_content = requests.get(main_url).content
+        for similar_url in urls[:self.MAX_COMPARE]:
+            diff_templates.append(self.create_from_diff(main_url, similar_url, page_content_1=root_page_content))
         # Search for the maximum diff xpaths.
         diff_templates_length = [ len(diff) for diff in diff_templates ]
         logging.info('MAX_DIFF: %s' % diff_templates_length)
@@ -36,12 +33,22 @@ class TemplatesService:
         return [ ]
 
     @rpc
+    def create(self, url):
+        """Create template from a single URL."""
+        link_urls = self.find_link_urls(root_url=url)
+        link_urls = list(set(link_urls))
+        similar_links = self.search_similar_links(root_url=url, urls=link_urls)
+        similar_urls = list(map(lambda x: x[ 0 ], similar_links))
+        similar_urls = list(set(similar_urls))
+        similar_urls = sorted(similar_urls, reverse=True, key=lambda x: len(x))
+        return self.create_from_urls(similar_urls, main_url=url)
+
+    @rpc
     def create_from_diff(self, url1, url2, page_content_1=None):
         tree1 = html.fromstring( page_content_1 or requests.get(url1).content )
         tree2 = html.fromstring(requests.get(url2).content)
         xpaths = self.diff_html(tree1, tree2)
         unique_xpaths = list(set(xpaths))
-        print(url2, len(unique_xpaths))
         return unique_xpaths
 
     def diff_html(self, elem1, elem2, paths=[]):
