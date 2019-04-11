@@ -3,7 +3,18 @@ import logging
 
 from lxml import html
 from nameko.rpc import rpc
+from selenium.webdriver.chrome import options
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium import webdriver
 from urllib.parse import urlparse
+
+
+SELENIUM_SERVER = 'http://127.0.0.1:4444/wd/hub'
+option_set = options.Options()
+option_set.add_argument('headless')
+option_set.add_argument('disable-notifications')
+option_set.add_argument('disable-gpu')
+option_set.add_argument('disable-infobars')
 
 
 class TemplatesService:
@@ -11,6 +22,7 @@ class TemplatesService:
 
     MAX_COMPARE = 5
     EXCLUDING_TAGS = ['script', 'style']
+    driver = webdriver.Remote(SELENIUM_SERVER, DesiredCapabilities.CHROME, options=option_set)
 
     @rpc
     def create_from_urls(self, urls, main_url=None):
@@ -19,7 +31,7 @@ class TemplatesService:
             main_url = urls[ 0 ]
         # Compare potential templates to find the one with maximum diff values.
         diff_templates = [ ]
-        root_page_content = requests.get(main_url).content
+        root_page_content = self._get_content(main_url)
         for similar_url in urls[:self.MAX_COMPARE]:
             diff_templates.append(self.create_from_diff(main_url, similar_url, page_content_1=root_page_content))
         # Search for the maximum diff xpaths.
@@ -45,8 +57,8 @@ class TemplatesService:
 
     @rpc
     def create_from_diff(self, url1, url2, page_content_1=None):
-        tree1 = html.fromstring( page_content_1 or requests.get(url1).content )
-        tree2 = html.fromstring(requests.get(url2).content)
+        tree1 = html.fromstring( page_content_1 or self._get_content(url1) )
+        tree2 = html.fromstring( self._get_content(url2))
         xpaths = self.diff_html(tree1, tree2)
         unique_xpaths = list(set(xpaths))
         return unique_xpaths
@@ -108,6 +120,11 @@ class TemplatesService:
     def find_link_urls(self, root_url):
         page_content = requests.get(root_url).content
         return self._find_link_urls(root_url=root_url, page_content=page_content)
+
+    def _get_content(self, url):
+        self.driver.get(url)
+        body_element = self.driver.find_element_by_xpath('/html')
+        return body_element.get_attribute('innerHTML')
 
     def _find_link_urls(self, root_url, page_content):
         tree = html.fromstring(page_content)
