@@ -32,7 +32,8 @@ const reducer = (state = initialState, action) => {
     case SET_DISCOVER_DATA:
       const discover_data = []
       Object.keys(action.data).forEach( (key) => {
-        const values = action.data[key].filter( entry => entry.text && entry.text.length > 0 ).map( entry => entry.text );
+        action.data[key] = action.data[key].filter( entry => entry.text && entry.text.trim().length > 0 )
+        const values = action.data[key].map( entry => entry.text.trim() );
         if (values.length > 0) {
           discover_data.push({
             id: key,
