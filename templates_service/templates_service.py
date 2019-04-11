@@ -9,7 +9,7 @@ from selenium import webdriver
 from urllib.parse import urlparse
 
 
-SELENIUM_SERVER = 'http://127.0.0.1:4444/wd/hub'
+SELENIUM_SERVER = 'http://selenium:4444/wd/hub'
 option_set = options.Options()
 option_set.add_argument('headless')
 option_set.add_argument('disable-notifications')
