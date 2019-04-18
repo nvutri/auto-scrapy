@@ -1,5 +1,6 @@
 import requests
 import logging
+import selenium
 
 from lxml import html
 from nameko.rpc import rpc
@@ -122,7 +123,12 @@ class TemplatesService:
         return self._find_link_urls(root_url=root_url, page_content=page_content)
 
     def _get_content(self, url):
-        self.driver.get(url)
+        try:
+            self.driver.get(url)
+        except selenium.common.exceptions.WebDriverException as e:
+            logging.error(e)
+            self.driver = webdriver.Remote(SELENIUM_SERVER, DesiredCapabilities.CHROME, options=option_set)
+            self.driver.get(url)
         body_element = self.driver.find_element_by_xpath('/html')
         return body_element.get_attribute('innerHTML')
 
