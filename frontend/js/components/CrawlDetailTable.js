@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 import ShowMore from 'react-show-more';
 
+const ELEM_ORDER = ['title', 'h1', 'h2', 'p', 'span']
 class CrawlDetailTable extends Component {
 
   constructor(props) {
@@ -23,8 +24,21 @@ class CrawlDetailTable extends Component {
     cell
   }
 
+  compareElement( x, y ) {
+    const xKey = x.split('_')[ 0 ];
+    const yKey = y.split('_')[ 0 ];
+    if (ELEM_ORDER.indexOf(xKey) == -1) {
+      return 1
+    }
+    if (ELEM_ORDER.indexOf(yKey) == -1) {
+      return -1
+    }
+    return ELEM_ORDER.indexOf(xKey) < ELEM_ORDER.indexOf(yKey) ? -1 : 1;
+  }
+
   render() {
-    const dataKeys = Object.keys(this.props.data);
+    var dataKeys = Object.keys(this.props.data);
+    dataKeys = dataKeys.sort( this.compareElement );
     const self = this;
     const data = dataKeys.map( (key) => {
       const values = Array.isArray(self.props.data[key]) ?
