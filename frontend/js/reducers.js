@@ -1,4 +1,4 @@
-import { SET_URL, SET_IS_CRAWLING, SET_CRAWL_DATA, SET_CRAWL_URLS, SET_DISCOVER_DATA } from './actions';
+import { SET_URL, SET_IS_CRAWLING, SET_CRAWL_DATA, SET_CRAWL_URLS, SET_DISCOVER_DATA, SET_REQUEST_MODE } from './actions';
 
 const initialState = {
   crawl_data: [],
@@ -6,6 +6,9 @@ const initialState = {
     data: [ ],
     page: 1,
     sizePerPage: 10,
+  },
+  request_mode: {
+    browser: false
   },
   is_crawling: false,
   url: ''
@@ -28,6 +31,10 @@ const reducer = (state = initialState, action) => {
     case SET_CRAWL_DATA:
       return Object.assign({}, state, {
         crawl_data: action.data
+      });
+    case SET_REQUEST_MODE:
+      return Object.assign({}, state, {
+        request_mode: action.value
       });
     case SET_DISCOVER_DATA:
       const discover_data = []

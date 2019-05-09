@@ -26,13 +26,13 @@ class TemplatesService:
     driver = webdriver.Remote(SELENIUM_SERVER, DesiredCapabilities.CHROME, options=option_set)
 
     @rpc
-    def create_from_urls(self, urls, main_url=None):
+    def create_from_urls(self, urls, main_url=None, browser=False):
         """Create template from URLs comparison."""
         if main_url is None:
             main_url = urls[ 0 ]
         # Compare potential templates to find the one with maximum diff values.
         diff_templates = [ ]
-        root_page_content = self._get_content(main_url)
+        root_page_content = self._get_content(main_url, browser=browser)
         for similar_url in urls[:self.MAX_COMPARE]:
             diff_templates.append(self.create_from_diff(main_url, similar_url, page_content_1=root_page_content))
         # Search for the maximum diff xpaths.
@@ -122,7 +122,14 @@ class TemplatesService:
         page_content = requests.get(root_url).content
         return self._find_link_urls(root_url=root_url, page_content=page_content)
 
-    def _get_content(self, url):
+    def _get_content(self, url, browser=False):
+        if browser:
+            return self._get_content_by_browser(url)
+        else:
+            response = requests.get(url)
+            return response.content
+
+    def _get_content_by_browser(self, url):
         try:
             self.driver.get(url)
         except selenium.common.exceptions.WebDriverException as e:

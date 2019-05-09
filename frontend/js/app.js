@@ -1,14 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { crawlUrl, setUrl, discoverUrl, setDiscoverData, setIsCrawling } from './actions';
+import { crawlUrl, setUrl, discoverUrl, setDiscoverData, setIsCrawling, setRequestMode } from './actions';
 import DiscoverTable from './components/DiscoverTable';
 
-import { Jumbotron, Well, Button, Row, Col, FormControl } from 'react-bootstrap';
+import { Jumbotron, Well, Button, Row, Col, FormControl, Checkbox } from 'react-bootstrap';
 
-const mapStateToProps =({ url, crawl_data, is_crawling }) => ({ url, crawl_data, is_crawling });
+const mapStateToProps = ({ url, crawl_data, is_crawling, request_mode }) => ({ url, crawl_data, is_crawling, request_mode });
 
-const App = ({ url, crawl_data, is_crawling, dispatch, }) => {
+const App = ({ url, crawl_data, is_crawling, request_mode, dispatch, }) => {
   return (
     <Jumbotron style={{height: '100%'}}>
       <Col md={1}/>
@@ -23,6 +23,9 @@ const App = ({ url, crawl_data, is_crawling, dispatch, }) => {
             disabled={ is_crawling }
             onChange={ (e) => { dispatch(setUrl(e.target.value)) } }
           />
+          <Checkbox checked={request_mode.browser} onClick={ (e) => { dispatch(setRequestMode({ browser: !request_mode.browser })) } }>
+            Use Headless Browser
+          </Checkbox>
         </Col>
         <Col md={2}>
           <Button
@@ -31,7 +34,7 @@ const App = ({ url, crawl_data, is_crawling, dispatch, }) => {
             onClick={ (e) => {
               dispatch(setIsCrawling(true));
               dispatch(setDiscoverData({}));
-              dispatch(discoverUrl(url));
+              dispatch(discoverUrl(url, request_mode.browser));
             }
           }>{ is_crawling ? 'Discovering...' : 'Discover' }</Button>
           </Col>

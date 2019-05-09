@@ -21,7 +21,7 @@ class GatewayService:
     @http('POST', '/discover')
     def discover(self, request):
         data = json.loads(request.get_data(as_text=True))
-        result = self.crawl_rpc.discover(data.get('url'))
+        result = self.crawl_rpc.discover(data.get('url'), data.get('browser'))
         return json.dumps(result)
 
     @http('POST', '/crawl')
@@ -29,9 +29,9 @@ class GatewayService:
         data = json.loads(request.get_data(as_text=True))
         result = {}
         if data.get('url'):
-            result = self.crawl_rpc.crawl(url=data.get('url'))
+            result = self.crawl_rpc.crawl(url=data.get('url'), browser=data.get('browser'))
         elif data.get('urls'):
-            result = self.crawl_rpc.crawl_urls(urls=data.get('urls'))
+            result = self.crawl_rpc.crawl_urls(urls=data.get('urls'), browser=data.get('browser'))
         return json.dumps(result)
 
     @http('GET', '/')

@@ -9,7 +9,7 @@ import { Button, Row, Col, Modal, Well } from 'react-bootstrap';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 
 const MIN_CRAWL_ITEMS = 2
-const mapStateToProps = ({ is_crawling }) => ({ is_crawling });
+const mapStateToProps = ({ is_crawling, request_mode }) => ({ is_crawling, request_mode });
 
 class SelectTable extends Component {
 
@@ -43,7 +43,7 @@ class SelectTable extends Component {
     this.setState({ showModal: true });
     this.props.dispatch(setIsCrawling(true));
     this.props.dispatch(setCrawlData([]));
-    this.props.dispatch(crawlUrls(selectedUrls));
+    this.props.dispatch(crawlUrls(selectedUrls, this.props.request_mode.browser));
   }
 
   render() {

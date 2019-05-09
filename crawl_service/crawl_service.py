@@ -29,8 +29,8 @@ class CrawlService:
     PATH_ID_DIGEST_SIZE = 4
 
     @rpc
-    def discover(self, root_url):
-        html_content = self._get_content(root_url)
+    def discover(self, root_url, browser=False):
+        html_content = self._get_content(root_url, browser=browser)
         html_tree = html.fromstring(html_content)
         tree = html_tree.getroottree()
         paths = self.discover_paths(html_tree)
@@ -44,14 +44,14 @@ class CrawlService:
         }
 
     @rpc
-    def crawl_urls(self, urls):
+    def crawl_urls(self, urls, browser=False):
         """Crawl multiple urls into data."""
         # Get the right template for the template service.
-        template = self.templates_rpc.create_from_urls(urls)
+        template = self.templates_rpc.create_from_urls(urls, browser=browser)
         # Crawl the page to acquire the data.
         results = []
         for url in urls:
-            html_content = self._get_content(url)
+            html_content = self._get_content(url, browser=browser)
             crawl_content = self._crawl_content(
                 page_content=html_content,
                 template=template,
@@ -129,7 +129,14 @@ class CrawlService:
             href = '%s://%s' % (scheme, href)
         return href
 
-    def _get_content(self, url):
+    def _get_content(self, url, browser=False):
+        if browser:
+            return self._get_content_by_browser(url)
+        else:
+            response = requests.get(url)
+            return response.content
+
+    def _get_content_by_browser(self, url):
         try:
             self.driver.get(url)
         except selenium.common.exceptions.WebDriverException as e:
