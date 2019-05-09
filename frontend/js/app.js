@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { crawlUrl, setUrl, discoverUrl, setDiscoverData, setIsCrawling } from './actions';
-import CrawlTable from './components/CrawlTable';
 import DiscoverTable from './components/DiscoverTable';
 
 import { Jumbotron, Well, Button, Row, Col, FormControl } from 'react-bootstrap';
@@ -36,12 +35,6 @@ const App = ({ url, crawl_data, is_crawling, dispatch, }) => {
             }
           }>{ is_crawling ? 'Discovering...' : 'Discover' }</Button>
           </Col>
-        </Row>
-        <br/>
-        <Row>
-          <Well>
-            <CrawlTable/>
-          </Well>
         </Row>
         <br/>
         <Row>

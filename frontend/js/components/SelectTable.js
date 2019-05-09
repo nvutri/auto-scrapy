@@ -2,9 +2,10 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { crawlUrls, setCrawlData, setIsCrawling } from '../actions';
+import CrawlTable from './CrawlTable';
 
 import PropTypes from 'prop-types';
-import { Button, Row, Col, Well } from 'react-bootstrap';
+import { Button, Row, Col, Modal, Well } from 'react-bootstrap';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 
 const MIN_CRAWL_ITEMS = 2
@@ -14,7 +15,10 @@ class SelectTable extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { numSelected: 0 };
+    this.state = {
+      numSelected: 0,
+      showModal: false
+    };
   }
 
   valueFormatter(value, cell) {
@@ -36,6 +40,7 @@ class SelectTable extends Component {
 
   handleClick() {
     const selectedUrls = this.refs.table.state.selectedRowKeys;
+    this.setState({ showModal: true });
     this.props.dispatch(setIsCrawling(true));
     this.props.dispatch(setCrawlData([]));
     this.props.dispatch(crawlUrls(selectedUrls));
@@ -70,6 +75,18 @@ class SelectTable extends Component {
         <TableHeaderColumn isKey dataField='href' hidden={true}>ID</TableHeaderColumn>
         <TableHeaderColumn dataField='text' dataFormat={ this.valueFormatter }>Links</TableHeaderColumn>
       </BootstrapTable>
+      <Modal show={this.state.showModal} bsSize="large" onHide={ () => this.setState({showModal: false})}>
+        <Modal.Header closeButton>
+          <Modal.Title>Crawl Results</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {
+            this.props.is_crawling ?
+              'Crawling...' :
+              <CrawlTable/>
+          }
+        </Modal.Body>
+      </Modal>
     </Well>
   }
 }
