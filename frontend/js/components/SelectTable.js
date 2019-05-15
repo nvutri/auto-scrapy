@@ -9,7 +9,7 @@ import { Button, Row, Col, Modal, Well } from 'react-bootstrap';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 
 const MIN_CRAWL_ITEMS = 2
-const mapStateToProps = ({ is_crawling, request_mode }) => ({ is_crawling, request_mode });
+const mapStateToProps = ({ is_crawling, crawl_data, request_mode }) => ({ is_crawling, crawl_data, request_mode });
 
 class SelectTable extends Component {
 
@@ -60,7 +60,7 @@ class SelectTable extends Component {
     return <Well>
       <Row>
         <Col md={2}/>
-        <Col md={8}>
+        <Col md={6}>
           <Button
             onClick={this.handleClick.bind(this)}
             bsStyle={canCrawl ? this.props.is_crawling ? 'primary' : 'info' : 'default' }
@@ -68,6 +68,9 @@ class SelectTable extends Component {
             block>
             { buttonTitle }
           </Button>
+        </Col>
+        <Col md={2}>
+          { this.props.crawl_data.length > 0 ? <Button onClick={ () => this.setState({showModal: true}) }>{`Show ${this.props.crawl_data.length} Results`}</Button> : '' }
         </Col>
       </Row>
       <br/>

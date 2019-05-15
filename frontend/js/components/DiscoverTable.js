@@ -24,7 +24,7 @@ const DiscoverTable = ({ discover_data, dispatch, }) => {
   }
 
   const tdStyle = { whiteSpace: 'normal' };
-  return <BootstrapTable
+  return discover_data && discover_data.length > 0 ? <BootstrapTable
     striped
     data={ discover_data }
     height='600px'
@@ -32,7 +32,7 @@ const DiscoverTable = ({ discover_data, dispatch, }) => {
     expandComponent={ expandComponent }>
     <TableHeaderColumn isKey dataField='id' hidden={true}>ID</TableHeaderColumn>
     <TableHeaderColumn dataField='title' tdStyle={ tdStyle } dataFormat={ titleFormatter }>URL Groups</TableHeaderColumn>
-  </BootstrapTable>
+  </BootstrapTable> : <div/>
 };
 
 export default connect( mapStateToProps )( DiscoverTable );

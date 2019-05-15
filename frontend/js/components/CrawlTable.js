@@ -26,6 +26,10 @@ const CrawlTable = ({ crawl_data, dispatch, }) => {
   if (crawl_data.length > 0) {
     var tableKeys = crawl_data[ 0 ] ? Object.keys(crawl_data[ 0 ]).filter( (key) => key[0] !== 'a' ) : [];
     tableKeys = tableKeys.sort(compareElement);
+    tableKeys = tableKeys.slice(0, 5);
+    if (tableKeys.indexOf('url') < 0) {
+      tableKeys.push('url');
+    }
     const expandComponent = (data) => <CrawlDetailTable data={ data }/>
     if (tableKeys.length > 0) {
       return <BootstrapTable
